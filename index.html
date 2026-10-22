@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="mr" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>महाराष्ट्र न्यूझ व ब्लॉग्स - ताज्या बातम्या आणि लेख</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            red: '#D32F2F',
+                            darkRed: '#B71C1C',
+                            blue: '#1976D2',
+                            dark: '#0F172A'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans Devanagari', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for Marathi -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
+        }
+        .ticker-wrap {
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .ticker-move {
+            display: inline-block;
+            animation: ticker 30s linear infinite;
+        }
+        .ticker-move:hover {
+            animation-play-state: paused;
+        }
+        @keyframes ticker {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-50%, 0, 0); }
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d32f2f;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-slate-900 text-gray-800 dark:text-gray-100 transition-colors duration-200 min-h-screen flex flex-col">
+
+    <!-- Top Utility Bar -->
+    <div class="bg-slate-900 text-white text-xs py-2 px-4 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
+            <div class="flex items-center gap-4">
+                <span id="current-date" class="flex items-center gap-1">
+                    <i class="far fa-calendar-alt text-brand-red"></i> आजचा दिनांक...
+                </span>
+                <span class="hidden sm:inline-flex items-center gap-1 text-yellow-400">
+                    <i class="fas fa-cloud-sun"></i> मुंबई/पुणे: ३२°C, निरभ्र
+                </span>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="openModal('saved-articles-modal')" class="hover:text-brand-red transition flex items-center gap-1">
+                    <i class="fas fa-bookmark text-brand-red"></i> जतन केलेल्या बातम्या (<span id="bookmark-count">0</span>)
+                </button>
+                <button onclick="toggleDarkMode()" class="p-1 rounded bg-slate-800 hover:bg-slate-700 text-yellow-400 transition" title="थीम बदला">
+                    <i id="theme-icon" class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="bg-white dark:bg-slate-800 shadow-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center gap-4">
+            <!-- Logo -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="filterCategory('all')">
+                <div class="bg-brand-red text-white p-2 sm:p-3 rounded-lg font-black text-xl sm:text-2xl shadow-lg leading-none">
+                    म
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-3xl font-extrabold text-brand-red tracking-tight dark:text-red-500">
+                        महाराष्ट्र <span class="text-slate-800 dark:text-white">न्यूझ</span>
+                    </h1>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">सत्य, जलद आणि विश्वासार्ह बातमीपत्र</p>
+                </div>
+            </div>
+
+            <!-- Search Bar & Action Buttons -->
+            <div class="flex items-center gap-3">
+                <div class="relative hidden md:block w-64 lg:w-80">
+                    <input type="text" id="search-input" onkeyup="handleSearch()" placeholder="बातमी किंवा विषय शोधा..." 
+                        class="w-full pl-9 pr-4 py-2 text-sm bg-gray-100 dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-full focus:outline-none focus:ring-2 focus:ring-brand-red dark:text-white">
+                    <i class="fas fa-search absolute left-3 top-2.5 text-gray-400"></i>
+                </div>
+                
+                <button onclick="openModal('create-post-modal')" class="bg-brand-red hover:bg-brand-darkRed text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-md transition transform active:scale-95">
+                    <i class="fas fa-pen-nib"></i> <span class="hidden sm:inline">ब्लॉग / बातमी सबमिट करा</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Breaking News Ticker -->
+        <div class="bg-slate-800 dark:bg-slate-950 text-white flex items-center text-xs sm:text-sm border-t border-b border-red-800">
+            <div class="bg-brand-red px-3 sm:px-4 py-2 font-bold shrink-0 flex items-center gap-1 uppercase tracking-wider animate-pulse">
+                <i class="fas fa-bolt"></i> ब्रेकिंग न्यूझ
+            </div>
+            <div class="ticker-wrap w-full py-1.5 overflow-hidden">
+                <div class="ticker-move text-gray-200" id="breaking-news-ticker">
+                    <!-- Dynamic Breaking News inserted via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Bar -->
+        <nav class="bg-slate-900 dark:bg-slate-900 border-t border-slate-800">
+            <div class="max-w-7xl mx-auto px-2 sm:px-4 flex items-center overflow-x-auto scrollbar-none py-1">
+                <button onclick="filterCategory('all')" class="nav-btn active-nav whitespace-nowrap px-3 py-2 text-xs sm:text-sm font-bold text-white hover:text-brand-red transition rounded-md">
+                    <i class="fas fa-home mr-1"></i> सर्व बातम्या
+                </button>
+                <button onclick="filterCategory('maharashtra')" class="nav-btn whitespace-nowrap px-3 py-2 text-xs sm:text-sm font-medium text-gray-300 hover:text-white transition rounded-md">
+                    महाराष्ट्र
+                </button>
+                <button onclick="filterCategory('sports')" class="nav-btn whitespace-nowrap px-3 py-2 text-xs sm:text-sm font-medium text-gray-300 hover:text-white transition rounded-md">
+                    क्रीडा
+                </button>
+                <button onclick="filterCategory('tech')" class="nav-btn whitespace-nowrap px-3 py-2 text-xs sm:text-sm font-medium text-gray-300 hover:text-white transition rounded-md">
+                    तंत्रज्ञान
+                </button>
+                <button onclick="filterCategory('entertainment')" class="nav-btn whitespace-nowrap px-3 py-2 text-xs sm:text-sm font-medium text-gray-300 hover:text-white transition rounded-md">
+                    मनोरंजन
+                </button>
+                <button onclick="filterCategory('lifestyle')" class="nav-btn whitespace-nowrap px-3 py-2 text-xs sm:text-sm font-medium text-gray-300 hover:text-white transition rounded-md">
+                    जीवनशैली व आरोग्य
+                </button>
+                <button onclick="filterCategory('blogs')" class="nav-btn whitespace-nowrap px-3 py-2 text-xs sm:text-sm font-medium text-yellow-400 hover:text-yellow-300 transition rounded-md font-bold">
+                    <i class="fas fa-feather-alt mr-1"></i> विचार व ब्लॉग्स
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Mobile Search Bar (Only visible on small screens) -->
+    <div class="p-3 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 md:hidden">
+        <div class="relative">
+            <input type="text" id="search-input-mobile" onkeyup="handleSearchMobile()" placeholder="बातमी किंवा विषय शोधा..." 
+                class="w-full pl-9 pr-4 py-2 text-sm bg-gray-100 dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-red dark:text-white">
+            <i class="fas fa-search absolute left-3 top-2.5 text-gray-400"></i>
+        </div>
+    </div>
+
+    <!-- Main Body Container -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow">
+        
+        <!-- Featured Slider / Hero Banner -->
+        <section id="hero-banner" class="mb-8">
+            <!-- Inserted dynamically via JavaScript -->
+        </section>
+
+        <!-- Layout Grid: Main Content (8 cols) + Sidebar (4 cols) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Left Grid: News & Blogs (8 Columns) -->
+            <div class="lg:col-span-8">
+                
+                <div class="flex justify-between items-center border-b-2 border-brand-red pb-2 mb-6">
+                    <h2 id="section-title" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <i class="fas fa-newspaper text-brand-red"></i> ताज्या बातम्या
+                    </h2>
+                    <span id="article-count" class="text-xs sm:text-sm bg-red-100 dark:bg-red-900/40 text-brand-red font-semibold px-2.5 py-1 rounded-full">
+                        ६ लेख उपलब्ध
+                    </span>
+                </div>
+
+                <!-- Articles Grid -->
+                <div id="articles-container" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <!-- Dynamic Articles populated here -->
+                </div>
+
+                <!-- No Results Found View -->
+                <div id="no-results" class="hidden text-center py-12 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
+                    <i class="fas fa-search-minus text-4xl text-gray-400 mb-3"></i>
+                    <h3 class="text-lg font-bold text-gray-700 dark:text-gray-200">काहीही आढळले नाही!</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">कृपया दुसरा शब्द शोधून पहा किंवा श्रेणी बदला.</p>
+                </div>
+
+                <!-- Special Section: Guest Blogs Showcase -->
+                <div class="mt-12 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-2xl p-6 shadow-xl">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <span class="text-xs uppercase tracking-wider text-yellow-400 font-bold">विशेष स्तंभ</span>
+                            <h3 class="text-xl font-bold">लेखक व विचारवंत ब्लॉग</h3>
+                        </div>
+                        <button onclick="filterCategory('blogs')" class="text-xs bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded-lg transition">
+                            सर्व ब्लॉग्स पहा <i class="fas fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+
+                    <div id="blogs-showcase" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Guest blogs loaded via JS -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Sidebar (4 Columns) -->
+            <aside class="lg:col-span-4 space-y-6">
+                
+                <!-- Trending / Popular News -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-slate-700">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white border-b border-gray-200 dark:border-slate-700 pb-3 mb-4 flex items-center gap-2">
+                        <i class="fas fa-fire text-brand-red animate-bounce"></i> सर्वाधिक वाचलेल्या बातम्या
+                    </h3>
+                    <div id="trending-news-list" class="space-y-4">
+                        <!-- Trending Articles Inserted JS -->
+                    </div>
+                </div>
+
+                <!-- Poll Widget -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-slate-700">
+                    <span class="text-xs font-bold text-brand-red uppercase">आजचा पोल (Opinion Poll)</span>
+                    <h4 class="font-bold text-sm text-gray-800 dark:text-gray-100 mt-1 mb-3">
+                        कृत्रिम बुद्धिमत्ता (AI) मुळे भविष्यात रोजगाराच्या नवीन संधी निर्माण होतील का?
+                    </h4>
+                    <div id="poll-options" class="space-y-2 text-xs font-medium">
+                        <button onclick="votePoll(0)" class="w-full text-left p-2.5 rounded-lg border border-gray-200 dark:border-slate-600 hover:bg-red-50 dark:hover:bg-slate-700 transition flex justify-between items-center">
+                            <span>होय, नक्कीच</span>
+                            <span id="poll-val-0" class="font-bold text-gray-500">६५%</span>
+                        </button>
+                        <button onclick="votePoll(1)" class="w-full text-left p-2.5 rounded-lg border border-gray-200 dark:border-slate-600 hover:bg-red-50 dark:hover:bg-slate-700 transition flex justify-between items-center">
+                            <span>नाही, नोकऱ्या कमी होतील</span>
+                            <span id="poll-val-1" class="font-bold text-gray-500">२५%</span>
+                        </button>
+                        <button onclick="votePoll(2)" class="w-full text-left p-2.5 rounded-lg border border-gray-200 dark:border-slate-600 hover:bg-red-50 dark:hover:bg-slate-700 transition flex justify-between items-center">
+                            <span>सांगता येत नाही</span>
+                            <span id="poll-val-2" class="font-bold text-gray-500">१०%</span>
+                        </button>
+                    </div>
+                    <p id="poll-thank-you" class="text-xs text-green-600 font-bold mt-2 hidden text-center">तुमचे मत नोंदवले गेले आहे! धन्यवाद.</p>
+                </div>
+
+                <!-- e-Paper / Newsletter Widget -->
+                <div class="bg-gradient-to-br from-brand-red to-brand-darkRed text-white rounded-xl p-6 shadow-md text-center">
+                    <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-envelope-open-text text-2xl"></i>
+                    </div>
+                    <h3 class="font-bold text-lg">दैनिक ई-पेपर आणि अपडेट्स</h3>
+                    <p class="text-xs text-red-100 mt-1 mb-4">दररोज सकाळी महत्त्वाच्या बातम्या थेट तुमच्या ईमेलवर मिळवा.</p>
+                    <form onsubmit="handleSubscribe(event)" class="space-y-2">
+                        <input type="email" required placeholder="तुमचा ईमेल पत्ता टाका" class="w-full px-3 py-2 text-xs rounded-lg text-gray-800 focus:outline-none dark:bg-slate-900 dark:text-white">
+                        <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 rounded-lg text-xs transition">
+                            नमोस्तुते / सदस्यता घ्या
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Social Media Links Widget -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-slate-700">
+                    <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-3">आमच्याशी जोडले जा</h3>
+                    <div class="grid grid-cols-2 gap-2 text-xs font-semibold">
+                        <a href="#" class="flex items-center gap-2 p-2 bg-blue-50 dark:bg-slate-700 text-blue-600 dark:text-blue-400 rounded-lg hover:opacity-80 transition">
+                            <i class="fab fa-facebook text-base"></i> फेसबुक
+                        </a>
+                        <a href="#" class="flex items-center gap-2 p-2 bg-sky-50 dark:bg-slate-700 text-sky-500 rounded-lg hover:opacity-80 transition">
+                            <i class="fab fa-twitter text-base"></i> ट्विटर
+                        </a>
+                        <a href="#" class="flex items-center gap-2 p-2 bg-green-50 dark:bg-slate-700 text-green-600 dark:text-green-400 rounded-lg hover:opacity-80 transition">
+                            <i class="fab fa-whatsapp text-base"></i> व्हॉट्सॲप
+                        </a>
+                        <a href="#" class="flex items-center gap-2 p-2 bg-red-50 dark:bg-slate-700 text-red-600 dark:text-red-400 rounded-lg hover:opacity-80 transition">
+                            <i class="fab fa-youtube text-base"></i> यूट्यूब
+                        </a>
+                    </div>
+                </div>
+
+            </aside>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-gray-400 text-xs mt-12 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="space-y-3">
+                <div class="flex items-center gap-2">
+                    <div class="bg-brand-red text-white p-2 rounded font-black text-lg">म</div>
+                    <span class="text-lg font-extrabold text-white">महाराष्ट्र न्यूझ</span>
+                </div>
+                <p class="leading-relaxed">
+                    महाराष्ट्रातील अग्रगण्य डिजिटल बातमीपत्र. क्रीडा, राजकारण, मनोरंजन आणि तंत्रज्ञानातील ताज्या घडामोडींचे विश्वसनीय व्यासपीठ.
+                </p>
+            </div>
+            <div>
+                <h4 class="text-white font-bold text-sm mb-3">महत्त्वाच्या लिंक्स</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" onclick="filterCategory('maharashtra')" class="hover:text-white transition">महाराष्ट्र बातम्या</a></li>
+                    <li><a href="#" onclick="filterCategory('sports')" class="hover:text-white transition">क्रीडा जगत</a></li>
+                    <li><a href="#" onclick="filterCategory('tech')" class="hover:text-white transition">तंत्रज्ञान व गॅजेट्स</a></li>
+                    <li><a href="#" onclick="filterCategory('blogs')" class="hover:text-white transition">लेखक व ब्लॉग्स</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-bold text-sm mb-3">धोरण व मदत</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" onclick="alert('आमच्याविषयी माहिती: हे महाराष्ट्राचे अधिकृत डिजिटल न्यूझ पोर्टल आहे.')" class="hover:text-white transition">आमच्याबद्दल</a></li>
+                    <li><a href="#" onclick="alert('संपर्क: contact@maharashtranews.in')" class="hover:text-white transition">संपर्क साधा</a></li>
+                    <li><a href="#" onclick="alert('गोपनीयता धोरण: तुमचा डेटा सुरक्षित ठेवला जातो.')" class="hover:text-white transition">गोपनीयता धोरण (Privacy)</a></li>
+                    <li><a href="#" onclick="alert('नियम आणि अटी लागू.')" class="hover:text-white transition">नियम आणि अटी</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-bold text-sm mb-3">कार्यालय</h4>
+                <p class="leading-relaxed">
+                    महाराष्ट्र न्यूझ मीडिया हाऊस,<br>
+                    सेनापती बापट मार्ग, दादर (पश्चिम),<br>
+                    मुंबई, महाराष्ट्र - ४०००२८
+                </p>
+            </div>
+        </div>
+        <div class="border-t border-slate-800 text-center py-4 text-gray-500">
+            © <span id="year"></span> महाराष्ट्र न्यूझ व ब्लॉग्स. सर्व हक्क सुरक्षित.
+        </div>
+    </footer>
+
+    <!-- ARTICLE READER MODAL -->
+    <div id="article-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-800 w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col my-auto border border-gray-200 dark:border-slate-700">
+            <!-- Modal Header Controls -->
+            <div class="p-4 border-b border-gray-200 dark:border-slate-700 flex justify-between items-center bg-gray-50 dark:bg-slate-900 sticky top-0 z-10">
+                <div class="flex items-center gap-2">
+                    <span id="modal-category" class="bg-brand-red text-white text-xs px-2.5 py-1 rounded font-bold uppercase"></span>
+                    <!-- Font Size Controls -->
+                    <div class="flex items-center bg-gray-200 dark:bg-slate-700 rounded-lg p-1 text-xs ml-2">
+                        <button onclick="changeFontSize(-2)" class="px-2 py-1 font-bold hover:bg-white dark:hover:bg-slate-600 rounded">A-</button>
+                        <button onclick="changeFontSize(2)" class="px-2 py-1 font-bold hover:bg-white dark:hover:bg-slate-600 rounded">A+</button>
+                    </div>
+                    <!-- Audio Read Aloud Button -->
+                    <button id="tts-btn" onclick="toggleAudio()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium flex items-center gap-1 transition">
+                        <i class="fas fa-volume-up"></i> <span id="tts-text">ऐका</span>
+                    </button>
+                </div>
+                <button onclick="closeModal('article-modal')" class="text-gray-500 hover:text-red-500 text-xl font-bold p-1">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content (Scrollable) -->
+            <div id="modal-article-body" class="p-4 sm:p-6 overflow-y-auto space-y-4 text-gray-800 dark:text-gray-200 leading-relaxed text-base">
+                <!-- Article inserted dynamic JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- CREATE/SUBMIT POST MODAL -->
+    <div id="create-post-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-slate-700">
+            <div class="p-4 bg-brand-red text-white flex justify-between items-center">
+                <h3 class="font-bold text-lg"><i class="fas fa-edit mr-2"></i> बातमी किंवा ब्लॉग सबमिट करा</h3>
+                <button onclick="closeModal('create-post-modal')" class="hover:text-gray-200"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <form onsubmit="handlePostSubmit(event)" class="p-5 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">शीर्षक (Title)</label>
+                    <input type="text" id="post-title" required placeholder="बातमी किंवा ब्लॉगचे शीर्षक टाका..." class="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:border-slate-600 text-sm dark:text-white">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">श्रेणी (Category)</label>
+                        <select id="post-category" class="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:border-slate-600 text-sm dark:text-white">
+                            <option value="maharashtra">महाराष्ट्र</option>
+                            <option value="sports">क्रीडा</option>
+                            <option value="tech">तंत्रज्ञान</option>
+                            <option value="entertainment">मनोरंजन</option>
+                            <option value="lifestyle">जीवनशैली</option>
+                            <option value="blogs">विचार व ब्लॉग्स</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">लेखकाचे नाव</label>
+                        <input type="text" id="post-author" required placeholder="तुमचे नाव" class="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:border-slate-600 text-sm dark:text-white">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">प्रतिमा URL (Image URL)</label>
+                    <input type="url" id="post-image" placeholder="https://images.unsplash.com/..." class="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:border-slate-600 text-sm dark:text-white">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">सविस्तर मजकूर (Content)</label>
+                    <textarea id="post-content" rows="5" required placeholder="येथे संपूर्ण बातमी किंवा लेख लिहा..." class="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:border-slate-600 text-sm dark:text-white"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-brand-red hover:bg-brand-darkRed text-white font-bold py-2.5 rounded-lg text-sm transition">
+                    प्रकाशित करा
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- SAVED ARTICLES MODAL -->
+    <div id="saved-articles-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden max-h-[85vh] flex flex-col border border-gray-200 dark:border-slate-700">
+            <div class="p-4 bg-slate-900 text-white flex justify-between items-center">
+                <h3 class="font-bold text-lg"><i class="fas fa-bookmark text-brand-red mr-2"></i> जतन केलेल्या बातम्या</h3>
+                <button onclick="closeModal('saved-articles-modal')" class="hover:text-gray-300"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <div id="saved-list-container" class="p-4 overflow-y-auto space-y-3 divide-y divide-gray-200 dark:divide-slate-700">
+                <!-- Bookmarks loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Data Store (Sample Initial News & Blogs in Marathi)
+        const initialArticles = [
+            {
+                id: '1',
+                title: "महाराष्ट्रातील पायाभूत सुविधांच्या विकासाला मोठा वेग; नवीन समृद्धी महामार्ग टप्प्याचे उद्घाटन लवकरच",
+                category: "maharashtra",
+                categoryName: "महाराष्ट्र",
+                image: "https://images.unsplash.com/photo-1545558014-8692077e9b5c?auto=format&fit=crop&w=800&q=80",
+                date: "२४ ऑक्टोबर २०२६",
+                author: "विशेष बातमीदार",
+                views: "१२.५ हजार",
+                readTime: "३ मिनेटे",
+                isFeatured: true,
+                snippet: "राज्य सरकारने पायाभूत सुविधांच्या विकासाला गती देण्यासाठी नवीन विकास आराखडा मंजूर केला आहे. यामुळे प्रवास अधिक वेगवान होईल...",
+                content: `महाराष्ट्रातील दळणवळण अधिक गतिमान आणि सोपे करण्यासाठी राज्य सरकारने आणखी एक महत्त्वाकांक्षी पाऊल उचलले आहे. समृद्धी महामार्गाच्या पुढील टप्प्याचे उद्घाटन लवकरच होणार असून यामुळे नागपूर ते मुंबई दरम्यानचा प्रवास अधिक सुखकर होणार आहे.
+
+स्थानिक उद्योग, व्यापार आणि पर्यटनाला या महामार्गामुळे मोठी चालना मिळणार असल्याचे तज्ज्ञांचे मत आहे. राज्य रस्ते विकास महामंडळाच्या (MSRDC) वरिष्ठ अधिकाऱ्यांनी दिलेल्या माहितीनुसार, सर्व प्रमुख सुरक्षेची तपासणी पूर्ण झाली आहे.
+
+या प्रकल्पामुळे ग्रामीण भागातील शेतकऱ्यांना त्यांचा माल वेळेत मोठ्या बाजारात पोहोचवणे शक्य होणार आहे.`
+            },
+            {
+                id: '2',
+                title: "भारतीय क्रिकेट संघाची शानदार कामगिरी; टी-२० मालिकेत मालिकाविजय पक्का",
+                category: "sports",
+                categoryName: "क्रीडा",
+                image: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?auto=format&fit=crop&w=800&q=80",
+                date: "२३ ऑक्टोबर २०२६",
+                author: "स्पोर्ट्स डेस्क",
+                views: "२५.१ हजार",
+                readTime: "४ मिनेटे",
+                isFeatured: true,
+                snippet: "रोमहर्षक सामन्यात भारताने शेवटच्या षटकात विजय मिळवत मालिका २-० ने खिशात घातली. सलामीवीरांचे अर्धशतक ठसठशीत...",
+                content: `भारतीय क्रिकेट संघाने आपला विजयाचा धडाका कायम राखत टी-२० मालिकेतील दुसऱ्या सामन्यातही दणदणीत विजय नोंदवला. अटीतटीच्या सामन्यात भारताने ४ गडी राखून प्रतिस्पर्धी संघाचा पराभव केला.
+
+सलामीवीर फलंदाजाने अवघ्या ३२ चेंडूंत ६५ धावांची तुफानी खेळी करत विजयाचा पाया रचला. गोलंदाजीतही भारतीय फिरकीपटूंनी मधल्या षटकांत उत्कृष्ट नियंत्रण ठेवले.
+
+कर्णधार आणि मुख्य प्रशिक्षकांनी संघाच्या या सामूहिक कामगिरीचे मनापासून कौतुक केले आहे.`
+            },
+            {
+                id: '3',
+                title: "कृत्रिम बुद्धिमत्ता (AI) क्षेत्रातील क्रांती: नवीन मराठी AI भाषा मॉडेलचे अनावरण",
+                category: "tech",
+                categoryName: "तंत्रज्ञान",
+                image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80",
+                date: "२४ ऑक्टोबर २०२६",
+                author: "टेक तज्ज्ञ",
+                views: "८.४ हजार",
+                readTime: "५ मिनेटे",
+                isFeatured: false,
+                snippet: "मराठी भाषेतील सर्व आधुनिक तंत्रज्ञान सुलभ करण्यासाठी भारतीय संशोधकांनी बनवले विशेष भाषा मॉडेल...",
+                content: `भारतीय तंत्रज्ञान क्षेत्रातील संशोधकांनी एक ऐतिहासिक टप्पा गाठला आहे. शुद्ध मराठी समजणारे आणि संवाद साधणारे नवीन AI मॉडेल नुकतेच प्रदर्शित करण्यात आले.
+
+यामुळे शालेय शिक्षण, प्रशासकीय कामकाज आणि शेतीविषयक सल्ल्यांमध्ये तंत्रज्ञानाचा वापर अधिक प्रभावीपणे करता येईल. हे मॉडेल पूर्णपणे मोफत आणि सर्वसामान्यांसाठी उपलब्ध असणार आहे.
+
+तंत्रज्ञान तज्ज्ञांच्या मते, भाषा समृद्धी आणि डिजिटल साक्षरतेसाठी हा अत्यंत महत्त्वाचा निर्णय ठरेल.`
+            },
+            {
+                id: '4',
+                title: "आरोग्य विशेष: दैनंदिन जीवनात योगासने आणि आहाराचे महत्त्व",
+                category: "lifestyle",
+                categoryName: "जीवनशैली",
+                image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=800&q=80",
+                date: "२२ ऑक्टोबर २०२६",
+                author: "डॉ. सुप्रिया जोशी",
+                views: "१५.९ हजार",
+                readTime: "६ मिनेटे",
+                isFeatured: false,
+                snippet: "सततच्या धावपळीच्या आयुष्यात शारीरिक आणि मानसिक आरोग्य कसे जपावे? वाचा सविस्तर मार्गदर्शन...",
+                content: `आधुनिक जीवनशैलीत ताणतणाव ही अत्यंत सामान्य समस्या बनली आहे. मात्र नियमित योगासने, ध्यान धारणा आणि संतुलित आहार याद्वारे आपण आपले जीवन निरोगी ठेवू शकतो.
+
+दररोज किमान ३० मिनिटे प्राणायाम आणि हलका व्यायाम केल्याने रक्ताभिसरण सुधारते आणि मानसिक एकाग्रता वाढते. यासोबतच जंक फूड टाळून ताजी फळे व पालेभाज्यांचा आहारात समावेश करणे आवश्यक आहे.`
+            },
+            {
+                id: '5',
+                title: "सिनेमा समीक्षा: नवीन कौटुंबिक चित्रपट 'स्पर्श नात्यांचा' प्रेक्षकांच्या पसंतीस",
+                category: "entertainment",
+                categoryName: "मनोरंजन",
+                image: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=800&q=80",
+                date: "२१ ऑक्टोबर २०२६",
+                author: "फिल्म समीक्षक",
+                views: "१८.२ हजार",
+                readTime: "३ मिनेटे",
+                isFeatured: false,
+                snippet: "भावनांनी भरलेली आणि सुंदर कथानक असलेली नवीन मराठी चित्रकृती बॉक्स ऑफिसवर हाऊसफुल...",
+                content: `या शुक्रवारी प्रदर्शित झालेला 'स्पर्श नात्यांचा' हा मराठी चित्रपट कौटुंबिक मूल्यांवर प्रकाश टाकतो. उत्कृष्ट दिग्दर्शन, सुंदर संगीत आणि कलाकारांच्या जिवंत अभिनयामुळे चित्रपट प्रेक्षकांना भावतो.
+
+कथानकातील भावनिक उतार-चढाव प्रेक्षकांना खिळवून ठेवतात. विशेषतः संगीतकार जोडीने दिलेले पार्श्वसंगीत गाण्यांना एक वेगळीच उंची देते.
+
+तुम्ही कुटुंबासोबत पाहू शकाल असा हा एक उत्तम चित्रपट आहे.`
+            },
+            {
+                id: '6',
+                title: "ब्लॉग: डिजिटल युगात वाचन संस्कृती लोप पावत चालली आहे का?",
+                category: "blogs",
+                categoryName: "विचार व ब्लॉग्स",
+                image: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80",
+                date: "२० ऑक्टोबर २०२६",
+                author: "प्रा. रमेश देशपांडे (अतिथी लेखक)",
+                views: "३०.१ हजार",
+                readTime: "७ मिनेटे",
+                isFeatured: false,
+                snippet: "स्मार्टफोन आणि सोशल मीडियाच्या जगात पुस्तकांची जागा स्क्रीनने घेतली आहे. नक्की काय बदलत आहे?",
+                content: `पूर्वीच्या काळी हातात पुस्तक घेऊन तासन् तास वाचण्यात जो आनंद होता, तो आजच्या रिल्स आणि शॉर्ट्सच्या जमान्यात हरवत चालला आहे का? हा प्रश्न प्रत्येक विचारवंताला सतावत आहे.
+
+परंतु दुसरीकडे, ई-बुक्स आणि ऑडिओ बुक्सच्या माध्यमातून नवीन पिढी वाचनाकडे वळतानाही दिसत आहे. माध्यम बदलले तरी वाचनाची ओढ टिकवून ठेवणे ही आपली जबाबदारी आहे.
+
+शाळा आणि घरांमध्ये पुस्तकांसाठी स्वतंत्र वेळ देणे अत्यंत गरजेचे बनले आहे.`
+            }
+        ];
+
+        // Global State Variables
+        let articles = JSON.parse(localStorage.getItem('mr_news_articles')) || initialArticles;
+        let bookmarks = JSON.parse(localStorage.getItem('mr_news_bookmarks')) || [];
+        let currentFilter = 'all';
+        let activeArticleForModal = null;
+        let currentFontSize = 16;
+        let isSpeaking = false;
+        let speechSynth = window.speechSynthesis;
+        let currentUtterance = null;
+
+        // Initialize App on DOM Load
+        window.addEventListener('DOMContentLoaded', () => {
+            updateDate();
+            renderBreakingNews();
+            renderHeroBanner();
+            renderArticles();
+            renderTrendingNews();
+            renderBlogShowcase();
+            updateBookmarkBadge();
+            document.getElementById('year').textContent = new Date().getFullYear();
+        });
+
+        // Date Display in Marathi
+        function updateDate() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const today = new Date().toLocaleDateString('mr-IN', options);
+            document.getElementById('current-date').innerHTML = `<i class="far fa-calendar-alt text-brand-red mr-1"></i> ${today}`;
+        }
+
+        // Render Breaking News Ticker
+        function renderBreakingNews() {
+            const tickerEl = document.getElementById('breaking-news-ticker');
+            const headlines = articles.map(a => `<span class="mx-6">🔴 <strong>${a.title}</strong></span>`).join('');
+            // Duplicated for continuous infinite scroll
+            tickerEl.innerHTML = headlines + headlines;
+        }
+
+        // Render Hero / Featured Slider
+        function renderHeroBanner() {
+            const featured = articles.filter(a => a.isFeatured) || [articles[0]];
+            const heroEl = document.getElementById('hero-banner');
+
+            if (featured.length === 0) return;
+
+            const item = featured[0]; // Primary featured item
+            heroEl.innerHTML = `
+                <div onclick="openArticleModal('${item.id}')" class="relative group cursor-pointer overflow-hidden rounded-2xl shadow-xl bg-slate-900 border border-gray-200 dark:border-slate-800">
+                    <img src="${item.image}" alt="${item.title}" class="w-full h-[320px] sm:h-[420px] object-cover group-hover:scale-105 transition duration-500 opacity-85">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent p-6 sm:p-8 flex flex-col justify-end">
+                        <span class="bg-brand-red text-white text-xs font-bold px-3 py-1 rounded-full w-fit mb-3 uppercase tracking-wide">
+                            <i class="fas fa-star text-yellow-300 mr-1"></i> प्रमुख बातमी (${item.categoryName})
+                        </span>
+                        <h2 class="text-xl sm:text-3xl font-extrabold text-white leading-tight group-hover:text-red-400 transition mb-2">
+                            ${item.title}
+                        </h2>
+                        <p class="text-xs sm:text-sm text-gray-300 line-clamp-2 mb-3 max-w-3xl">
+                            ${item.snippet}
+                        </p>
+                        <div class="flex items-center gap-4 text-xs text-gray-400 font-medium">
+                            <span><i class="far fa-user mr-1 text-brand-red"></i> ${item.author}</span>
+                            <span><i class="far fa-clock mr-1"></i> ${item.readTime}</span>
+                            <span><i class="far fa-eye mr-1"></i> ${item.views} वाचन</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render Main Articles Grid
+        function renderArticles() {
+            const container = document.getElementById('articles-container');
+            const noResults = document.getElementById('no-results');
+            
+            let filtered = articles;
+            
+            // Category Filter
+            if (currentFilter !== 'all') {
+                filtered = filtered.filter(a => a.category === currentFilter);
+            }
+
+            // Search Term Filter
+            const searchVal = (document.getElementById('search-input')?.value || document.getElementById('search-input-mobile')?.value || '').toLowerCase();
+            if (searchVal) {
+                filtered = filtered.filter(a => a.title.toLowerCase().includes(searchVal) || a.snippet.toLowerCase().includes(searchVal));
+            }
+
+            document.getElementById('article-count').textContent = `${filtered.length} लेख उपलब्ध`;
+
+            if (filtered.length === 0) {
+                container.innerHTML = '';
+                noResults.classList.remove('hidden');
+                return;
+            } else {
+                noResults.classList.add('hidden');
+            }
+
+            container.innerHTML = filtered.map(item => {
+                const isBookmarked = bookmarks.includes(item.id);
+                return `
+                <article class="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition duration-300 border border-gray-200 dark:border-slate-700/60 flex flex-col">
+                    <div class="relative overflow-hidden cursor-pointer" onclick="openArticleModal('${item.id}')">
+                        <img src="${item.image}" alt="${item.title}" class="w-full h-48 object-cover hover:scale-105 transition duration-300">
+                        <span class="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-md uppercase">
+                            ${item.categoryName}
+                        </span>
+                    </div>
+                    
+                    <div class="p-4 flex-grow flex flex-col justify-between space-y-3">
+                        <div>
+                            <div class="flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400 mb-1">
+                                <span><i class="far fa-calendar-alt text-brand-red mr-1"></i> ${item.date}</span>
+                                <span><i class="far fa-clock mr-1"></i> ${item.readTime}</span>
+                            </div>
+                            <h3 onclick="openArticleModal('${item.id}')" class="font-bold text-base text-gray-900 dark:text-white line-clamp-2 hover:text-brand-red dark:hover:text-red-400 cursor-pointer transition">
+                                ${item.title}
+                            </h3>
+                            <p class="text-xs text-gray-600 dark:text-gray-300 line-clamp-2 mt-2 leading-relaxed">
+                                ${item.snippet}
+                            </p>
+                        </div>
+
+                        <div class="pt-3 border-t border-gray-100 dark:border-slate-700 flex items-center justify-between text-xs">
+                            <span class="text-gray-500 font-medium truncate max-w-[120px]">
+                                <i class="far fa-user text-brand-red mr-1"></i> ${item.author}
+                            </span>
+                            <div class="flex items-center gap-3">
+                                <button onclick="toggleBookmark('${item.id}', event)" class="text-gray-400 hover:text-brand-red transition" title="जतन करा">
+                                    <i class="${isBookmarked ? 'fas text-brand-red' : 'far'} fa-bookmark text-base"></i>
+                                </button>
+                                <button onclick="shareArticle('${item.title}', event)" class="text-gray-400 hover:text-blue-500 transition" title="शेअर करा">
+                                    <i class="fas fa-share-alt text-base"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            `}).join('');
+        }
+
+        // Render Sidebar Trending News
+        function renderTrendingNews() {
+            const list = document.getElementById('trending-news-list');
+            const sorted = [...articles].sort((a, b) => parseFloat(b.views) - parseFloat(a.views)).slice(0, 4);
+
+            list.innerHTML = sorted.map((item, idx) => `
+                <div onclick="openArticleModal('${item.id}')" class="flex gap-3 items-center group cursor-pointer p-1 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700/50 transition">
+                    <span class="text-2xl font-black text-gray-300 dark:text-slate-600 group-hover:text-brand-red transition w-6 text-center">
+                        ०${idx + 1}
+                    </span>
+                    <div class="flex-grow">
+                        <h4 class="text-xs font-bold text-gray-800 dark:text-gray-200 line-clamp-2 group-hover:text-brand-red transition">
+                            ${item.title}
+                        </h4>
+                        <span class="text-[10px] text-gray-400 mt-0.5 block">
+                            <i class="far fa-eye text-brand-red mr-1"></i> ${item.views} वाचले
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render Blog Section Showcase
+        function renderBlogShowcase() {
+            const showcase = document.getElementById('blogs-showcase');
+            const blogs = articles.filter(a => a.category === 'blogs').slice(0, 2);
+
+            showcase.innerHTML = blogs.map(blog => `
+                <div onclick="openArticleModal('${blog.id}')" class="bg-slate-800 p-4 rounded-xl border border-slate-700 hover:border-yellow-500 transition cursor-pointer flex gap-3">
+                    <img src="${blog.image}" class="w-16 h-16 rounded-full object-cover border-2 border-yellow-400 shrink-0">
+                    <div>
+                        <span class="text-[10px] bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded font-bold">लेखक</span>
+                        <h4 class="text-xs font-bold text-white mt-1 line-clamp-2 hover:text-yellow-300">${blog.title}</h4>
+                        <p class="text-[11px] text-gray-400 mt-1"><i class="far fa-user mr-1"></i> ${blog.author}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Category Navigation Filter
+        function filterCategory(cat) {
+            currentFilter = cat;
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active-nav', 'text-brand-red', 'font-bold');
+            });
+
+            // Update UI Section Title
+            const titles = {
+                all: '<i class="fas fa-newspaper text-brand-red"></i> सर्व बातम्या',
+                maharashtra: '<i class="fas fa-map-marker-alt text-brand-red"></i> महाराष्ट्र विशेष',
+                sports: '<i class="fas fa-running text-brand-red"></i> क्रीडा बातम्या',
+                tech: '<i class="fas fa-microchip text-brand-red"></i> तंत्रज्ञान आणि गॅजेट्स',
+                entertainment: '<i class="fas fa-film text-brand-red"></i> मनोरंजन व चित्रपट',
+                lifestyle: '<i class="fas fa-heartbeat text-brand-red"></i> जीवनशैली व आरोग्य',
+                blogs: '<i class="fas fa-feather-alt text-brand-red"></i> विचार व ब्लॉग्स'
+            };
+
+            document.getElementById('section-title').innerHTML = titles[cat] || titles.all;
+            renderArticles();
+        }
+
+        // Search Handlers
+        function handleSearch() {
+            renderArticles();
+        }
+        function handleSearchMobile() {
+            renderArticles();
+        }
+
+        // Open Article Detail Modal
+        function openArticleModal(id) {
+            const article = articles.find(a => a.id === id);
+            if (!article) return;
+
+            activeArticleForModal = article;
+            document.getElementById('modal-category').textContent = article.categoryName;
+            
+            const modalBody = document.getElementById('modal-article-body');
+            modalBody.style.fontSize = `${currentFontSize}px`;
+
+            modalBody.innerHTML = `
+                <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white leading-snug">
+                    ${article.title}
+                </h2>
+                
+                <div class="flex flex-wrap items-center justify-between text-xs text-gray-500 dark:text-gray-400 border-y border-gray-200 dark:border-slate-700 py-2.5 my-3">
+                    <div class="flex items-center gap-3">
+                        <span><i class="far fa-user text-brand-red mr-1"></i> <strong>${article.author}</strong></span>
+                        <span><i class="far fa-calendar-alt mr-1"></i> ${article.date}</span>
+                    </div>
+                    <span><i class="far fa-eye mr-1"></i> ${article.views} वाचन</span>
+                </div>
+
+                <img src="${article.image}" alt="${article.title}" class="w-full h-64 sm:h-80 object-cover rounded-xl shadow-md my-4">
+
+                <div class="space-y-4 font-normal text-gray-700 dark:text-gray-200 leading-relaxed whitespace-pre-line">
+                    ${article.content}
+                </div>
+
+                <!-- Share & Bookmark CTA in modal -->
+                <div class="flex items-center justify-between bg-gray-50 dark:bg-slate-900 p-3 rounded-xl mt-6 border border-gray-200 dark:border-slate-700">
+                    <span class="text-xs font-bold text-gray-600 dark:text-gray-300">ही बातमी मित्रांना पाठवा:</span>
+                    <div class="flex items-center gap-2">
+                        <button onclick="shareArticle('${article.title}', event)" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 hover:bg-green-700">
+                            <i class="fab fa-whatsapp"></i> व्हॉट्सॲप
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Comment Section -->
+                <div class="mt-8 border-t border-gray-200 dark:border-slate-700 pt-6">
+                    <h3 class="font-bold text-base mb-4 text-gray-900 dark:text-white"><i class="far fa-comments text-brand-red mr-2"></i> प्रतिक्रिया व्यक्त करा</h3>
+                    <form onsubmit="handleCommentSubmit(event)" class="space-y-3">
+                        <input type="text" id="comment-name" required placeholder="तुमचे नाव" class="w-full p-2.5 text-xs border rounded-lg dark:bg-slate-700 dark:border-slate-600 dark:text-white">
+                        <textarea id="comment-text" required rows="2" placeholder="येथे तुमची प्रतिक्रिया लिहा..." class="w-full p-2.5 text-xs border rounded-lg dark:bg-slate-700 dark:border-slate-600 dark:text-white"></textarea>
+                        <button type="submit" class="bg-brand-red text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-brand-darkRed transition">प्रतिक्रिया द्या</button>
+                    </form>
+                    <div id="comments-list" class="mt-4 space-y-3">
+                        <div class="p-3 bg-gray-50 dark:bg-slate-900 rounded-lg text-xs">
+                            <span class="font-bold text-gray-800 dark:text-gray-200">सुनील पाटील</span>
+                            <p class="text-gray-600 dark:text-gray-400 mt-1">अत्यंत माहितीपूर्ण आणि महत्त्वाची बातमी! धन्यवाद.</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            openModal('article-modal');
+        }
+
+        // Font Size Adjuster in Article Modal
+        function changeFontSize(delta) {
+            currentFontSize = Math.min(Math.max(14, currentFontSize + delta), 22);
+            const modalBody = document.getElementById('modal-article-body');
+            if (modalBody) modalBody.style.fontSize = `${currentFontSize}px`;
+        }
+
+        // Marathi Audio Read Aloud (Text to Speech)
+        function toggleAudio() {
+            if (!activeArticleForModal) return;
+
+            if (isSpeaking) {
+                speechSynth.cancel();
+                isSpeaking = false;
+                document.getElementById('tts-text').textContent = "ऐका";
+                document.getElementById('tts-btn').classList.replace('bg-red-600', 'bg-blue-600');
+            } else {
+                const textToRead = `${activeArticleForModal.title}. ${activeArticleForModal.content}`;
+                currentUtterance = new SpeechSynthesisUtterance(textToRead);
+                currentUtterance.lang = 'mr-IN'; // Marathi language code
+                currentUtterance.rate = 0.9;
+
+                currentUtterance.onend = () => {
+                    isSpeaking = false;
+                    document.getElementById('tts-text').textContent = "ऐका";
+                    document.getElementById('tts-btn').classList.replace('bg-red-600', 'bg-blue-600');
+                };
+
+                speechSynth.speak(currentUtterance);
+                isSpeaking = true;
+                document.getElementById('tts-text').textContent = "थांबवा";
+                document.getElementById('tts-btn').classList.replace('bg-blue-600', 'bg-red-600');
+            }
+        }
+
+        // Bookmark Toggle
+        function toggleBookmark(id, event) {
+            if (event) event.stopPropagation();
+            
+            const index = bookmarks.indexOf(id);
+            if (index > -1) {
+                bookmarks.splice(index, 1);
+                showToast("बातमी जतन यादीतून हटवली.");
+            } else {
+                bookmarks.push(id);
+                showToast("बातमी जतन केली गेली!");
+            }
+            
+            localStorage.setItem('mr_news_bookmarks', JSON.stringify(bookmarks));
+            updateBookmarkBadge();
+            renderArticles();
+            renderSavedArticles();
+        }
+
+        function updateBookmarkBadge() {
+            document.getElementById('bookmark-count').textContent = bookmarks.length;
+        }
+
+        // Render Saved Articles in Modal
+        function renderSavedArticles() {
+            const container = document.getElementById('saved-list-container');
+            const savedItems = articles.filter(a => bookmarks.includes(a.id));
+
+            if (savedItems.length === 0) {
+                container.innerHTML = `<p class="text-xs text-center text-gray-500 py-6">तुम्ही कोणतीही बातमी जतन केलेली नाही.</p>`;
+                return;
+            }
+
+            container.innerHTML = savedItems.map(item => `
+                <div class="pt-3 first:pt-0 flex justify-between items-center gap-3">
+                    <div onclick="closeModal('saved-articles-modal'); openArticleModal('${item.id}');" class="cursor-pointer flex-grow">
+                        <h4 class="text-xs font-bold text-gray-800 dark:text-gray-200 line-clamp-1 hover:text-brand-red">${item.title}</h4>
+                        <span class="text-[10px] text-gray-400">${item.categoryName} • ${item.date}</span>
+                    </div>
+                    <button onclick="toggleBookmark('${item.id}', event)" class="text-red-500 text-xs p-1 hover:bg-red-50 rounded">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Submit New User Article / Blog
+        function handlePostSubmit(e) {
+            e.preventDefault();
+            const title = document.getElementById('post-title').value;
+            const category = document.getElementById('post-category').value;
+            const author = document.getElementById('post-author').value;
+            const image = document.getElementById('post-image').value || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=800&q=80';
+            const content = document.getElementById('post-content').value;
+
+            const categoryNames = {
+                maharashtra: "महाराष्ट्र",
+                sports: "क्रीडा",
+                tech: "तंत्रज्ञान",
+                entertainment: "मनोरंजन",
+                lifestyle: "जीवनशैली",
+                blogs: "विचार व ब्लॉग्स"
+            };
+
+            const newPost = {
+                id: Date.now().toString(),
+                title,
+                category,
+                categoryName: categoryNames[category] || "सर्वसाधारण",
+                image,
+                date: "आत्ताच",
+                author,
+                views: "१",
+                readTime: "२ मिनिटे",
+                isFeatured: false,
+                snippet: content.substring(0, 100) + '...',
+                content
+            };
+
+            articles.unshift(newPost);
+            localStorage.setItem('mr_news_articles', JSON.stringify(articles));
+
+            closeModal('create-post-modal');
+            e.target.reset();
+            showToast("तुमची बातमी / ब्लॉग यशस्वीपणे सबमिट झाला!");
+            renderArticles();
+            renderHeroBanner();
+        }
+
+        // Comment Submit Handler
+        function handleCommentSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('comment-name').value;
+            const text = document.getElementById('comment-text').value;
+
+            const list = document.getElementById('comments-list');
+            const newComment = document.createElement('div');
+            newComment.className = 'p-3 bg-gray-50 dark:bg-slate-900 rounded-lg text-xs animate-fade-in';
+            newComment.innerHTML = `<span class="font-bold text-gray-800 dark:text-gray-200">${name}</span><p class="text-gray-600 dark:text-gray-400 mt-1">${text}</p>`;
+            
+            list.prepend(newComment);
+            e.target.reset();
+            showToast("प्रतिक्रिया नोंदवली गेली!");
+        }
+
+        // Opinion Poll Vote
+        function votePoll(optionIdx) {
+            document.getElementById('poll-thank-you').classList.remove('hidden');
+            showToast("मत नोंदवल्याबद्दल धन्यवाद!");
+        }
+
+        // Newsletter Subscription
+        function handleSubscribe(e) {
+            e.preventDefault();
+            showToast("अभिनंदन! ई-पेपर सदस्यत्वासाठी तुमची नोंदणी झाली आहे.");
+            e.target.reset();
+        }
+
+        // Native Share / Clipboard Fallback
+        function shareArticle(title, event) {
+            if (event) event.stopPropagation();
+            if (navigator.share) {
+                navigator.share({
+                    title: title,
+                    text: title,
+                    url: window.location.href,
+                }).catch(() => {});
+            } else {
+                document.execCommand('copy');
+                showToast("बातमीची लिंक कॉपी झाली आहे!");
+            }
+        }
+
+        // Modal Controls
+        function openModal(id) {
+            if (id === 'saved-articles-modal') renderSavedArticles();
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+            if (id === 'article-modal' && isSpeaking) {
+                speechSynth.cancel();
+                isSpeaking = false;
+            }
+        }
+
+        // Dark/Light Mode Toggle
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                icon.classList.replace('fa-sun', 'fa-moon');
+            } else {
+                html.classList.add('dark');
+                icon.classList.replace('fa-moon', 'fa-sun');
+            }
+        }
+
+        // Toast Notification System
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'bg-slate-900 text-white text-xs px-4 py-3 rounded-lg shadow-xl border border-brand-red flex items-center gap-2 transform transition-all duration-300 translate-y-2 opacity-0';
+            toast.innerHTML = `<i class="fas fa-check-circle text-brand-red"></i> ${msg}`;
+            
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
